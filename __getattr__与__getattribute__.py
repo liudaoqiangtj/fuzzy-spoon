@@ -1,3 +1,4 @@
+
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -31,7 +32,8 @@ d = Dynamo(1)
 #Out[13]: AttributeError('getattr')
 #d.size
 #Out[14]: AttributeError('getattr')
-#这可以说明，同时定义了__getattribute__和__getattr__时，无论属性是否存在时都会调用getattribute方法，虽然存在属性size但没有满足key=='color'会调用__getattr__返回AttributeError('getattr')
+#这可以说明，同时定义了__getattribute__和__getattr__时，无论属性是否存在时都会调用getattribute方法，虽然存在属性size但没有满足key=='color'
+#会调用__getattr__返回AttributeError('getattr')
 #而不存在时d.colorR则直接去调用__getattr__
 
 '''
