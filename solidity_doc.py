@@ -1,0 +1,115 @@
+'''
+一个简单的合约
+pragma solidity ^0.4.21;
+
+contract Coin {
+    // The keyword "public" makes those variables
+    // readable from outside.
+    address public minter;
+    mapping (address => uint) public balances;
+
+    // Events allow light clients to react to
+    // changes efficiently.
+    event Sent(address from, address to, uint amount);
+
+    // This is the constructor whose code is
+    // run only when the contract is created.
+    function Coin() public {
+        minter = msg.sender;
+    }
+    function mint(address receiver, uint amount) public {
+        if (msg.sender != minter) return;
+        balances[receiver] += amount;
+    }
+
+    function send(address receiver, uint amount) public {
+        if (balances[msg.sender] < amount) return;
+        balances[msg.sender] -= amount;
+        balances[receiver] += amount;
+        emit Sent(msg.sender, receiver, amount);
+    }
+}
+
+Block Basic 
+挖矿，哈希函数，椭圆曲线加密，点对点网络
+
+Transactions 
+每一次交易都是加密的，明确地保障只有代币持有者账户修改数据库的权限。
+
+Blocks
+区块链出块间隔相同，Ethereum 出块间隔17秒
+
+The Ethereum Virtual Machine (EVM)
+沙盒，隔离，EVM中运行的代码对网络，文件系统和其他进程没有访问权限。
+
+Account 
+External Account 公钥－私钥对控制，Contract Account 由合约内的存储的代码控制，而EVM不区分哪种账户。
+External Account 的地址由公钥确定，而Contract Account地址在创建时就确定了，来源于合约账户创建着的地址和该地址发出的交易编号
+
+Transactions
+交易的目的地址是0时，这次交易会创建一个新的合约。这意味着为了创建新的合约，你不需要发送合约的真实代码。
+
+Gas
+当EVM执行交易时，Gas会根据特定的规则逐渐耗尽。
+
+Storage，Memory and the Stack
+每个账户都有一个256bit到256bit映射的键值对的storage;Memory 是线性的，从中为每一个message call 获取新近清除的用例。
+EVM 不是一个register machine, 是一个stack machine.EVM 的所有计算都集中在stack上，最大包括1024个32字节的元素。
+
+
+address public minter 等价于 function minter() returns (address) { return minter}；
+address public minter 声明了一个可以从合约外部访问的状态变量;public 关键字自动生成了一个允许从合约外部访问的函数。
+mapping(address => uint) public balanceOf; 状态变量等价于
+  function balanceOf(address _account) public view returns (uint){
+    return balanceOf[_account];
+  }
+  
+event Sent(address from, address to, uint amount);触发事件后会被控制台监听并跟踪交易，监听函数
+Coin.Sent().Watch{},'',function(error,result){
+  if(!error){
+  console.log("Coin transfer:" + result.args.amount +
+  "Coin were Sent from" + result.args.from +
+  "to" + result.args.to + ".");
+  console.log("BalanceOf now:\n" + 
+  "Sender:" + Coin.balanceOf.call(result.args.from) +
+  "Receiver:" + Coin.balanceOf.call(result.args.to))
+  }
+}
+当用合约向地址发送一定量的代币时，并不能在区块地址查看到余额的变化，因为地址余额的变化仅仅存储在合约的数据存储区；
+可以触发一个事件来跟踪交易和查看新余额。
+
+Block and Transaction Properties
+block.hash(uint256 blocknumber);block.coinbase(address)当前块的挖矿地址；block.difficulty(uint32) 当前块的难度;
+block.gaslimit(uint256 );block.number(uint256);block.timestamp(uint);
+gasleft() returns (uint256): 剩余gas
+msg.data(bytes) 完整的调用数据；msg.gas(uint) 剩余gas；msg.sender(address)当前调用的消息的发送者；
+msg.sig(bytes4) msg.data的前四个字节的数据；msg.value(uint) 消息发送的代币数目(Wei)
+now(uint) block.timestamp(uint) 别名;tx.gasvalue(uint) 交易的gas 价格；tx.origin(address) 整个交易调用的发起地址
+
+错误处理(Error Handling)
+assert(bool condition) ,内部错误，取消交易
+require(bool condition [, string message]) ,输入或外部组建错误，回退revert,(可选)提供错误信息
+revert([string message]), 取消执行回退正常状态，(可选)提供说明信息message
+
+算术和加密函数(Mathematical and Cryptographic Functions)
+addmod(uint x, uint y, uint k) returns (uint)  (x+y)%k;mulmod(uint x, uint y, uint k) returns (uint) x*y%k; 假定k != 0
+keccak256(...) returns (bytes32) 计算Ethereum-SHA-3 (Keccak-256)紧密排列的哈希值，返回32字节
+sha256(...) returns (bytes32) 计算紧密排列SHA-256的哈希值
+sha3(...) returns(bytes 32) keccak256(...) returns (bytes32)函数别名
+ripemd(...) returns (bytes20) 计算RIPEMD-160哈希值
+ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes v) returns (address) 恢复与公钥相关联的地址或错误返回0
+
+地址相关Address Related
+<address>.balance(uint256) 返回地址余额
+<address>.transfer(uint256 amount) 向address 转移amount Wei的代币,将消耗2300Wei gas，转账失败则throw
+<address>.send(uint256 amount) returns (bool) 向address发送amount Wei代币，失败则返回false
+<address>.call(...) returns (bool) //low-level CALL ?
+<address>.callcode(...) returns (bool) // low-level CALLCODE？
+<address>.delegatecall(...) returns (bool) 
+
+Contract Related 合约相关
+this 当前合约
+selfdestruct(address recipient): 毁掉当前合约，并把代币返回到给定的地址
+suicide(address recipient) 与selfdestruct(address recipient) 
+
+

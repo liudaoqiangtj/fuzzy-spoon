@@ -162,7 +162,7 @@ Enter a number>8 squared is 64
 Enter a number>6 squared is 36
 Enter a number>Bye
 more.py 调用input函数从stdin读取用户的交互输入，另一方面它从stdin中读取输入文本,这意味着stdin要同时接收控制台交互输入
-和输入文本；当stdin被重定向到管道或文件时就不能继续从控制台读取用户交互输入，此时它只能从管道符获取输入。所以虽然程序可以幸运执行，但是他是有问题的。
+和输入文本；当stdin被重定向到管道时就不能继续从控制台读取用户交互输入，此时它只能从管道符获取输入。所以虽然程序可以幸运执行，但是他是有问题的。
 使用特殊的接口从键盘而非标准输入，直接读取用户输入。在windows下，python标准库msvcrt模块提供了该功能。
 moreplus.py脚本不带参数调用时它对标准输入流进行分页，并且利用底层平台相关的工具实现用户交互。
 moreplus.py
